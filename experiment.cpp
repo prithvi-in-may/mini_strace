@@ -3,11 +3,8 @@
 #include <sys/ptrace.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include <string.h>
 
 using namespace std;
-
-void tokenize(char input[], char* buf[]);
 
 int main(int argc, char * argv[]) { 
   
@@ -20,8 +17,8 @@ int main(int argc, char * argv[]) {
 
     cout << "I am the child" << endl;
 
-    tokenize((char*)argv, args);
-    execvp(argv[1], args);
+    // argv[1] gives value at index 1, &argv[1] gives value of memory address at index 1 which is an array
+    execvp(argv[1], &argv[1]);
     
     // If execlp fails 
     perror("execlp");
@@ -32,7 +29,6 @@ int main(int argc, char * argv[]) {
     cout << "I am the parent" << endl;
     waitpid(pid, nullptr, 0);
 
-
   } else {
     perror("Fork");
   }
@@ -41,16 +37,3 @@ int main(int argc, char * argv[]) {
 
 }
 
-void tokenize(char input[], char* buf[]) {
-
-  char *token = strtok(input, " ");
-  int i = 0;
-
-  while(token != NULL) {
-    buf[i++] = token;
-    token = strtok(NULL, " ");
-  }
-
-  buf[i] = nullptr;
-
-}
