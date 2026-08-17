@@ -6,6 +6,7 @@
 #include <sys/ptrace.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <signal.h>
 
 using namespace std;
 
@@ -48,15 +49,30 @@ int main(int argc, char * argv[]) {
     cout << " (" << strsignal(WSTOPSIG(status)) << ")" << endl;
 
     // Allow the child to run before the parent dies, the child will run anyway if the tracer (parent process) disappears though
-    ptrace(PTRACE_CONT, pid, nullptr, nullptr);
+    while (true) {
+    // A system call has two moments where parent can stop the child, first is when there is syscall entry and then the other one exit and PTRACE_SYSCALL stops at both. For producing real output, we need information from both sides.
+    ptrace(PTRACE_SYSCALL, pid, nullptr, nullptr);
 
     waitpid(pid, &status, 0);
 
-    cout << "Child finished" << endl;
+    cout << " " << endl;
+    cout << "ptrace stop" << endl;
+
+    if (WIFSTOPPED(status)) {
+      siginfo_t info; 
+
+      ptrace(PTRACE_GETSIGINFO, pid, nullptr, &info);
+
+      // si_signo tells which signal occured (e.g. SIGTRAP)
+      cout << "Signal: " << info.si_signo << endl;
+      // si_code tells why that signal was generated or the metadata of the signal not syscall
+      cout << "Code: " << info.si_code << endl;
+     } 
 
     if (WIFEXITED(status)) {
-      cout << "Child exited with status: " << WIFEXITED(status) << endl;
-     }
+      break;
+    }} 
+
 
   } else {
     perror("Fork");
