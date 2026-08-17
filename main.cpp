@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <sys/user.h>
 
 using namespace std;
 
@@ -60,8 +61,12 @@ int main(int argc, char * argv[]) {
 
     if (WIFSTOPPED(status)) {
       siginfo_t info; 
+      struct user_regs_struct regs;
 
+      ptrace(PTRACE_GETREGS, pid, nullptr, &regs);
       ptrace(PTRACE_GETSIGINFO, pid, nullptr, &info);
+
+      cout << "Syscall number: " << regs.orig_rax << endl;
 
       // si_signo tells which signal occured (e.g. SIGTRAP)
       cout << "Signal: " << info.si_signo << endl;
