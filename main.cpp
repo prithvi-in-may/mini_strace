@@ -14,6 +14,11 @@ const char* syscall_name(long number);
 
 int main(int argc, char * argv[]) {
 
+  if (argc < 2) {
+        std::cerr << "Usage: " << argv[0] << " <program> [args...]\n";
+        return 1;
+  }
+
   pid_t pid = fork();
 
   if (pid == 0) {
@@ -42,7 +47,6 @@ int main(int argc, char * argv[]) {
 
     // Allow the child to run before the parent dies, the child will run anyway if the tracer (parent process) disappears though
     bool entering_syscall = true; 
-    siginfo_t info;
     struct user_regs_struct regs;
     while (true) {
     ptrace(PTRACE_SYSCALL, pid, nullptr, nullptr);

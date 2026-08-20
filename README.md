@@ -1,6 +1,6 @@
 # Mini strace
 
-This is a small educational system-call tracer for Linux, built from scratch in C++ using `ptrace()` API. The project intends to explore process tracing, CPU registers and how Linux processes interact with the kernel through system calls and how a debugger/tracer can observe those interactions at system-call boundary and also access CPU registers of the target process. 
+This is a small educational system-call tracer for Linux-x86-64, built from scratch in C++ using `ptrace()` API. The project intends to explore process tracing, CPU registers and how Linux processes interact with the kernel through system calls and how a debugger/tracer can observe those interactions at system-call boundary and also access CPU registers of the target process. 
 
 --- 
 
@@ -72,4 +72,6 @@ ptrace(
 
 The exact meaning and use may defer depending on what you want to do (or `WHAT_DO_I_WANT` or what operation you requested). For example, when you are using `PTRACE_TRACEME` to mark the child process as the `tracee` and parent as the `tracer`, you do not need to pass any process id (`WHICH_PROCESS`) and can simply pass `0`.
 
+## How to build
 
+The project contains a `Makefile` so simply run `make` to compile the code and `make clean` to clean it.
