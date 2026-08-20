@@ -19,8 +19,6 @@ int main(int argc, char * argv[]) {
   if (pid == 0) {
     // Child process
 
-    char *args[100];
-
     // Using ptrace option PTRACE_TRACEME to allow the parent process trace the child process and puts a `tracing stop` after execvp is executed
     // ptrace second argument is the process id which must be passed in other options except PTRACE_TRACEME
     ptrace(PTRACE_TRACEME, 0, nullptr, nullptr);
@@ -50,12 +48,11 @@ int main(int argc, char * argv[]) {
     ptrace(PTRACE_SYSCALL, pid, nullptr, nullptr);
 
     waitpid(pid, &status, 0);
-    ptrace(PTRACE_GETREGS, pid, nullptr, &regs);
 
-    
     if (WIFEXITED(status)) {
       break;
     }
+    ptrace(PTRACE_GETREGS, pid, nullptr, &regs);
 
     if (entering_syscall) {
       // cout << "SYSCALL ENTRY: " << syscall_name(regs.orig_rax) << endl;
