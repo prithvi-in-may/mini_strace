@@ -21,8 +21,6 @@ int main(int argc, char * argv[]) {
 
     char *args[100];
 
-    cout << "I am the child" << endl;
-
     // Using ptrace option PTRACE_TRACEME to allow the parent process trace the child process and puts a `tracing stop` after execvp is executed
     // ptrace second argument is the process id which must be passed in other options except PTRACE_TRACEME
     ptrace(PTRACE_TRACEME, 0, nullptr, nullptr);
@@ -37,10 +35,7 @@ int main(int argc, char * argv[]) {
   } else if (pid > 0) {
     // Parent process
 
-    cout << "I am the parent" << endl;
-
     // Status stores what state change happened to the child
-
     int status;
     waitpid(pid, &status, 0);
 
