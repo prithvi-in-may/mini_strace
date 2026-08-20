@@ -24,7 +24,6 @@ int main(int argc, char * argv[]) {
     cout << "I am the child" << endl;
 
     // Using ptrace option PTRACE_TRACEME to allow the parent process trace the child process and puts a `tracing stop` after execvp is executed
-    // ptrace(WHAT_DO_I_WANT, WHICH_PROCESS, ADDRESS, EXTRA_DATA)
     // ptrace second argument is the process id which must be passed in other options except PTRACE_TRACEME
     ptrace(PTRACE_TRACEME, 0, nullptr, nullptr);
 
@@ -45,8 +44,6 @@ int main(int argc, char * argv[]) {
     int status;
     waitpid(pid, &status, 0);
 
-    // WSTOPSIG macro extracts the signal responsible for the change in state. strsignal converts that signal in readable format
-
     cout << "Signal: " << WSTOPSIG(status);
     cout << " (" << strsignal(WSTOPSIG(status)) << ")" << endl;
 
@@ -55,7 +52,6 @@ int main(int argc, char * argv[]) {
     siginfo_t info;
     struct user_regs_struct regs;
     while (true) {
-    // A system call has two moments where parent can stop the child, first is when there is syscall entry and then the other one exit and PTRACE_SYSCALL stops at both. For producing real output, we need information from both sides.
     ptrace(PTRACE_SYSCALL, pid, nullptr, nullptr);
 
     waitpid(pid, &status, 0);
@@ -67,14 +63,15 @@ int main(int argc, char * argv[]) {
     }
 
     if (entering_syscall) {
-      cout << "SYSCALL ENTRY: " << syscall_name(regs.orig_rax) << endl;
+      // cout << "SYSCALL ENTRY: " << syscall_name(regs.orig_rax) << endl;
+      cout << syscall_name(regs.orig_rax) << "(" << regs.rdi << ", " << regs.rsi << ", " << regs.rdx << ", " << regs.r10 << ", " << regs.r8 << ", " << regs.r9 << ")" ;
     } else {
-      cout << "SYSCALL EXIT: " << syscall_name(regs.orig_rax) << endl;
-      cout << "Return value: " << regs.rax << endl;
-      cout << " " << endl;;
+      cout << " = " << regs.rax << endl;
+      // cout << "SYSCALL EXIT: " << syscall_name(regs.orig_rax) << endl;
+      // cout << "Return value: " << regs.rax << endl; // Return value of syscall
     }
 
-    entering_syscall = !entering_syscall;
+    entering_syscall = !entering_syscall; // It sarts with being true, when the first half cycle of syscall is completed, it flips to false to indicate exit point.
 
     }
 
