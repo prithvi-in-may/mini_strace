@@ -10,6 +10,7 @@
 #include <sys/user.h>
 
 using namespace std;
+const char* syscall_name(long number);
 
 int main(int argc, char * argv[]) {
 
@@ -58,20 +59,19 @@ int main(int argc, char * argv[]) {
     ptrace(PTRACE_SYSCALL, pid, nullptr, nullptr);
 
     waitpid(pid, &status, 0);
+    ptrace(PTRACE_GETREGS, pid, nullptr, &regs);
 
-    cout << " " << endl;
     
     if (WIFEXITED(status)) {
       break;
     }
-    
+
     if (entering_syscall) {
-      cout << "SYSCALL ENTRY" << endl;
-      cout << "Number: " << regs.orig_rax << endl;
+      cout << "SYSCALL ENTRY: " << syscall_name(regs.orig_rax) << endl;
     } else {
-      cout << "SYSCALL EXIT" << endl;
-      cout << "Number: " << regs.orig_rax << endl;
+      cout << "SYSCALL EXIT: " << syscall_name(regs.orig_rax) << endl;
       cout << "Return value: " << regs.rax << endl;
+      cout << " " << endl;;
     }
 
     entering_syscall = !entering_syscall;
@@ -84,4 +84,30 @@ int main(int argc, char * argv[]) {
 
   return 0;
 
+}
+
+const char* syscall_name(long number) {
+    switch (number) {
+        case 0:   return "read";
+        case 1:   return "write";
+        case 2:   return "open";
+        case 3:   return "close";
+        case 5:   return "fstat";
+        case 9:   return "mmap";
+        case 10:  return "mprotect";
+        case 11:  return "munmap";
+        case 12:  return "brk";
+        case 16:  return "ioctl";
+        case 21:  return "access";
+        case 39:  return "getpid";
+        case 60:  return "exit";
+        case 61:  return "wait4";
+        case 158: return "arch_prctl";
+        case 217: return "getdents64";
+        case 231: return "exit_group";
+        case 257: return "openat";
+
+        default:
+            return "unknown";
+    }
 }
